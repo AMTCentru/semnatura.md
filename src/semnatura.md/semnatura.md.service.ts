@@ -15,62 +15,65 @@ const rename = util.promisify(fs.rename);
 @Injectable()
 export class SemnaturaMdService {
 
-
-  private readonly downloadPath: string = path.join(os.homedir(), 'Downloads','temp');
-  private browser: Browser | null = null;
-  private page: Page | null = null;
-  private data: string;
+  //private browser: Browser | null = null;
+  //private page: Page | null = null;
 
   async delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   async scrapeJobListings(mainDto: MainDto) {
-    
-    await this.createFolder(this.downloadPath);
-    this.browser = await puppeteer.launch({
+
+    //const browser: Browser
+    const browser = await puppeteer.launch({
       executablePath: '/usr/bin/google-chrome-stable',
       args: ['--no-sandbox'],
       headless: false,
       defaultViewport: { width: 1920, height: 1080 },
     });
-    this.page = await this.browser.newPage();
-    const client = await this.page.createCDPSession()
-    await client.send('Page.setDownloadBehavior', {
-      behavior: 'allow',
-      downloadPath: this.downloadPath,
-    })
+
     try {
-      return await this.executeWithRetry(() => this.start(mainDto));
+      return await this.executeWithRetry(() => this.start(mainDto,browser));
     } 
     catch (error) {
       return `Error while scraping job listings: ${error}`;
     } 
     finally {
-      await this.browser.close();
+      await browser.close();
     }
     
   }
-  async start(mainDto: MainDto){
-    await this.page.goto('https://semnatura.md/Home/JpStep1');
-    const pas1 = await this.Pas1(this.page);
+  async start(mainDto: MainDto, browser:Browser){
+    const page = await browser.newPage();
+
+    await page.goto('https://semnatura.md/Home/JpStep1');
+
+    const elementHandle = await page.$("body > div > div.container > div.featurette > p > span");
+    const codims = await page.evaluate(element => element.textContent.trim(), elementHandle);
+
+    const client = await page.createCDPSession()
+    await client.send('Page.setDownloadBehavior', {
+      behavior: 'allow',
+      downloadPath: path.join(process.env.DOWNLOAD_PATH_CONTRACT,codims),
+    })
+    const pas1 = await this.Pas1(page);
     if(pas1.includes("Eroare")){
       return {status: false ,message: pas1}
     }
-    const pas2 = await this.Pas2(this.page);
+    const pas2 = await this.Pas2(page);
     if(pas2.includes("Eroare")){
       return {status: false ,message: pas2}
     }
 
     for (const angajat of mainDto.angajati) {
-      const pas3 = await this.Pas3(this.page, angajat);
+      const pas3 = await this.Pas3(page, angajat);
       if(pas3.includes("Eroare")){
         return {status: false ,message: pas3}
       }
     }
-    await this.Pas4(this.page,mainDto.responsabil);
-    await this.Pas5(this.page);
-    const codpachet = await this.Pas6(this.page);
+    await this.Pas4(page,mainDto.responsabil);
+    await this.Pas5(page);
+    const codpachet = await this.Pas6(page,codims);
     return {status: true, message : codpachet}
 
   }
@@ -94,9 +97,7 @@ export class SemnaturaMdService {
   }
   async Pas1(page : Page){
     try{
-      const elementHandle = await page.$("body > div > div.container > div.featurette > p > span");
-      const codims = await page.evaluate(element => element.textContent.trim(), elementHandle);
-      this.data = codims;
+
       const idnoElement = "#idno";
       await page.waitForSelector(idnoElement);
       await page.click(idnoElement);
@@ -278,11 +279,8 @@ export class SemnaturaMdService {
     }
   }
 
-  async Pas6(page: Page){
+  async Pas6(page: Page,codpachet:string){
     try{
-      let DestinationFolder = path.resolve(`./files/`+ this.data + "/");
-      console.log(DestinationFolder)
-      await this.createFolder(DestinationFolder);
       const contract = "body > div > div.container > div.featurette > b > div:nth-child(5) > div:nth-child(2) > a > h5";
       await page.waitForSelector(contract, { timeout: 5000 }); // așteaptă maxim 10 secunde
       
@@ -299,32 +297,16 @@ export class SemnaturaMdService {
       await page.click(centralizat);
       const contplata = "body > div > div.container > div.featurette > b > div:nth-child(5) > div:nth-child(5) > a > h5";
       await page.click(contplata);
-      await this.fileMove(this.downloadPath,DestinationFolder);
+
       const finalizeazacomanda = "body > div > div.container > div.right-banner.thumbnail.shadow.hidden-xs > div > a";
       await page.click(finalizeazacomanda);
       const confirmcomanda = "#ConfirmStartNewTr";
       await page.waitForSelector(confirmcomanda);
       await page.click(confirmcomanda);
-      return this.data
+      return codpachet
     }
     catch(error){
       throw new Error(`Eroare la pas6 :${error}`)
-    }
-  }
-  public async fileMove(sourceFolder: string, destinationFolder: string): Promise<void> {
-    let files;
-    let pdfCount;
-    while (pdfCount !== 4) {
-      // Delay for 1 second
-      await this.delay(500);
-      files = await readdir(sourceFolder);
-      pdfCount = files.filter(file => path.extname(file).toLowerCase() === '.pdf').length;
-    }
-
-    for (const file of files) {
-      const sourcePath = path.join(sourceFolder, file);
-      const destPath = path.join(destinationFolder, file);
-      await rename(sourcePath, destPath);
     }
   }
   public async createFolder(folderPath: string): Promise<void> {

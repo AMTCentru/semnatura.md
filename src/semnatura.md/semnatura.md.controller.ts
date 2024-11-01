@@ -7,9 +7,7 @@ import { SemnaturaMdService } from './semnatura.md.service';
 @Controller('semnatura.md')
 export class SemnaturaMdController {
 
-    constructor(
-        private readonly service : SemnaturaMdService
-    ){}
+    constructor(private readonly service : SemnaturaMdService){}
     
     @Post()
     @ApiOperation({ summary: 'Scrape job listings' })
