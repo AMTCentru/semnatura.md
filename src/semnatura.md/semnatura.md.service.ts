@@ -4,19 +4,14 @@ import { Page } from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as util from 'util';
-import * as os from 'os';
 import { MainDto } from './dto/MainDto';
 import { seDateDto } from './dto/seDateDto';
 import { seResponsabilDto } from './dto/seResponsabilDto';
 
 const readdir = util.promisify(fs.readdir);
-const rename = util.promisify(fs.rename);
 
 @Injectable()
 export class SemnaturaMdService {
-
-  //private browser: Browser | null = null;
-  //private page: Page | null = null;
 
   async delay(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms));
@@ -24,12 +19,8 @@ export class SemnaturaMdService {
 
   async scrapeJobListings(mainDto: MainDto) {
 
-    //const browser: Browser
     const browser = await puppeteer.launch({
-      executablePath: '/usr/bin/google-chrome-stable',
-      args: ['--no-sandbox'],
-      headless: false,
-      defaultViewport: { width: 1920, height: 1080 },
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
 
     try {
@@ -298,6 +289,15 @@ export class SemnaturaMdService {
       const contplata = "body > div > div.container > div.featurette > b > div:nth-child(5) > div:nth-child(5) > a > h5";
       await page.click(contplata);
 
+      let files;
+      let pdfCount;
+      while (pdfCount !== 4) {
+        // Delay for 1 second
+        await this.delay(500);
+        files = await readdir(path.join(process.env.DOWNLOAD_PATH_CONTRACT,codpachet));
+        pdfCount = files.filter(file => path.extname(file).toLowerCase() === '.pdf').length;
+      }
+      
       const finalizeazacomanda = "body > div > div.container > div.right-banner.thumbnail.shadow.hidden-xs > div > a";
       await page.click(finalizeazacomanda);
       const confirmcomanda = "#ConfirmStartNewTr";
