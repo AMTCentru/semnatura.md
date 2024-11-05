@@ -101,10 +101,12 @@ export class SemnaturaMdService {
     }
   }
   async Pas2(page: Page){
+    console.log('Start Pas2')
     try{
       const persJuridic = "body > div > div.container > div.featurette > b > div > div:nth-child(1) > a:nth-child(2)";
       await page.waitForSelector(persJuridic);
       await page.click(persJuridic);//accesare persoana juridica
+      console.log('Start Pas2 - click persJuridic')
 
       await page.waitForNavigation({ waitUntil: 'load' });
 
@@ -118,6 +120,7 @@ export class SemnaturaMdService {
       const codfiscal = "#FiscalCode";
       await page.waitForSelector(codfiscal);
       await page.click(codfiscal);
+      console.log('Start Pas2 - click codfiscal')
       const oras = "#City";
       await page.click(oras);
       await page.type(oras,process.env.IDNO_ORAS);
@@ -165,6 +168,7 @@ export class SemnaturaMdService {
     }
   }
   async Pas3(page: Page, angajati : seDateDto){
+    console.log('Start Pas3')
     try{
       await page.waitForNavigation({ waitUntil: 'load' });
 
@@ -235,6 +239,7 @@ export class SemnaturaMdService {
 
   
   async Pas4(page: Page, responsabil : seResponsabilDto){
+    console.log('Start Pas4')
     try{
       await page.goto("https://semnatura.md/Home/AddResponsible");
       await page.waitForNavigation({ waitUntil: 'load' });
@@ -266,6 +271,7 @@ export class SemnaturaMdService {
     }
   }
   async Pas5(page: Page){
+    console.log('Start Pas5')
     try{
       await page.goto("https://semnatura.md/Home/JpStep5");
       await page.waitForNavigation({ waitUntil: 'load' });
@@ -280,6 +286,7 @@ export class SemnaturaMdService {
   }
 
   async Pas6(page: Page,codpachet:string){
+    console.log('Start Pas6')
     try{
       const contract = "body > div > div.container > div.featurette > b > div:nth-child(5) > div:nth-child(2) > a > h5";
       await page.waitForSelector(contract, { timeout: 5000 }); // așteaptă maxim 10 secunde
