@@ -264,8 +264,6 @@ export class SemnaturaMdService {
       await page.click(bif6);
       const respbuto = "#ResponsibleForm > div.row > div:nth-child(3) > button";
       await page.click(respbuto);
-      await page.waitForNavigation({ waitUntil: 'load' });
-
     }
     catch(error){
       throw new Error(`Eroare la pas4 :${error}`)
@@ -278,7 +276,6 @@ export class SemnaturaMdService {
       const trasnmitcomand = "#submitForm > div > div:nth-child(3) > button";
       await page.waitForSelector(trasnmitcomand, { timeout: 2000 }); // așteaptă maxim 10 secunde
       await page.click(trasnmitcomand);
-      await page.waitForNavigation({ waitUntil: 'load' });
     }
     catch(error){
       throw new Error(`Eroare la pas5 :${error}`);
@@ -294,8 +291,7 @@ export class SemnaturaMdService {
       // Așteaptă până când elementul devine disponibil pe pagină
       await page.waitForFunction(
         (selector) => document.querySelector(selector) !== null,
-        {},
-        contract
+        {},contract
       );
       await page.click(contract);
       const certificare = "body > div > div.container > div.featurette > b > div:nth-child(5) > div:nth-child(3) > a > h5";
