@@ -106,6 +106,8 @@ export class SemnaturaMdService {
       await page.waitForSelector(persJuridic);
       await page.click(persJuridic);//accesare persoana juridica
 
+      await page.waitForNavigation({ waitUntil: 'load' });
+
       const comandanoua = "#idnoForm > div:nth-child(3) > div:nth-child(1) > a";
       const elementExists = await page.$(comandanoua);
       if (elementExists) {
@@ -136,6 +138,8 @@ export class SemnaturaMdService {
       const pasUrmator = "#JuridicalPerson > div.row > div:nth-child(3) > button";
       await page.click(pasUrmator);
         
+      await page.waitForNavigation({ waitUntil: 'load' });
+
       // Verifică dacă atributul 'generated' este setat și are valoarea 'true'
       const validareCodfiscal = "#JuridicalPerson > div:nth-child(5) > div > span > span"
       const elementHandle = await page.$(validareCodfiscal);
@@ -162,6 +166,7 @@ export class SemnaturaMdService {
   }
   async Pas3(page: Page, angajati : seDateDto){
     try{
+      await page.waitForNavigation({ waitUntil: 'load' });
 
       const AddEmployee = "body > div:nth-child(1) > div.container > div.featurette > div:nth-child(6) > div:nth-child(2) > a";
       await page.waitForSelector(AddEmployee);
@@ -232,6 +237,8 @@ export class SemnaturaMdService {
   async Pas4(page: Page, responsabil : seResponsabilDto){
     try{
       await page.goto("https://semnatura.md/Home/AddResponsible");
+      await page.waitForNavigation({ waitUntil: 'load' });
+
       const numeprenume = "#NumePrenume";
       await page.waitForSelector(numeprenume);
       await page.click(numeprenume);
@@ -261,6 +268,8 @@ export class SemnaturaMdService {
   async Pas5(page: Page){
     try{
       await page.goto("https://semnatura.md/Home/JpStep5");
+      await page.waitForNavigation({ waitUntil: 'load' });
+
       const trasnmitcomand = "#submitForm > div > div:nth-child(3) > button";
       await page.waitForSelector(trasnmitcomand, { timeout: 2000 }); // așteaptă maxim 10 secunde
       await page.click(trasnmitcomand);
