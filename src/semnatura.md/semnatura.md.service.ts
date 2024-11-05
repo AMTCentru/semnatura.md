@@ -153,6 +153,7 @@ export class SemnaturaMdService {
           console.log('Atributul generated="true" există pe element.');
           await page.type(codfiscal,process.env.IDNO);
           await page.click(pasUrmator);
+          await page.waitForNavigation({ waitUntil: 'load' });
         } 
       } 
       return "true"
@@ -170,7 +171,6 @@ export class SemnaturaMdService {
   async Pas3(page: Page, angajati : seDateDto){
     console.log('Start Pas3')
     try{
-      await page.waitForNavigation({ waitUntil: 'load' });
 
       const AddEmployee = "body > div:nth-child(1) > div.container > div.featurette > div:nth-child(6) > div:nth-child(2) > a";
       await page.waitForSelector(AddEmployee);
