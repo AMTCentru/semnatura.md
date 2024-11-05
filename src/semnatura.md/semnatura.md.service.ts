@@ -169,7 +169,7 @@ export class SemnaturaMdService {
     }
   }
   async Pas3(page: Page, angajati : seDateDto){
-    console.log('Start Pas3' + angajati.nume)
+    console.log('Start Pas3 - ' + angajati.nume)
     try{
 
       const AddEmployee = "body > div:nth-child(1) > div.container > div.featurette > div:nth-child(6) > div:nth-child(2) > a";
@@ -225,11 +225,12 @@ export class SemnaturaMdService {
       const bif3 = "#EmployeeForm > div:nth-child(15) > label";
         await page.waitForSelector(bif3)
         await page.click(bif3);
+        await page.screenshot({ path: '../../screen.png' });
       const adaugare = "#EmployeeForm > div:nth-child(17) > div:nth-child(3) > button";
         await page.waitForSelector(adaugare)
         await page.click(adaugare);
         await page.waitForNavigation({ waitUntil: 'load' });
-        return "true"
+      return "true"
     }
     catch(error){
       console.log(`Eroare la pas3 : ${error}`);
